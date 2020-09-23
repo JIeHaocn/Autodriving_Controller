@@ -1,7 +1,13 @@
 classdef Create_Trajectory
-    %UNTITLED3 此处显示有关此类的摘要
-    %   此处显示详细说明
-    
+%   Create_Trajectory    
+%   Class definition of creating predefinied trajectory points 
+%   The trajectory includes a set of line segments and circle arcs where the parameters (e.g., length, radius) are definitely known
+%   add_line(length): import the length of line segment
+%   add_circle(theta_d,radius): import the desired central angle and radius of circle arc
+%   plot_traj: plot trajectory
+%   ani_traj
+%   print_file
+
     properties
         sample_time = 0.1   % unit: s
         velocity = 0.5      % unit: m/s
@@ -125,7 +131,7 @@ classdef Create_Trajectory
         
         function print_file(obj)
 %             traj_theta_deg = obj.traj_theta/pi*180; % unit: degree
-            fid=fopen('C:\Users\Jie Hao\Desktop\route.txt','w');    
+            fid=fopen('route.txt','w');    
             for i=1:size(obj.traj_x,1)
                 fprintf(fid,'%.6f %.6f %.6f\n',obj.traj_x(i),obj.traj_y(i),obj.traj_speed(i));  
             end

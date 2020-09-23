@@ -1,4 +1,11 @@
 function [points_x_return, points_y_return, points_theta_return] = get_circle_points(x0, y0, theta0, theta_d, radius, velocity, sample_time)
+%   get_line_points  Calculate line segment points
+%   x0, y0, theta0: initial state of the car
+%   theta_d: desired central angle of the circle arc
+%   radius: radius of the circle arc
+%   velocity: velocity of the car
+%   sample_time
+
     points_x = zeros(5000,1);
     points_y = zeros(5000,1);
     points_theta = zeros(5000,1);
