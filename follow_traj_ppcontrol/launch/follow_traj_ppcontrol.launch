@@ -1,0 +1,13 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <!--
+  <include file="$(find racecar)/launch/teleop.launch">
+  </include>  
+  -->
+  
+  <node name="follow_traj_ppcontroller" pkg="follow_traj_ppcontrol" type="follow_traj_ppcontrol">
+ 	<param name="para_Lfc" type="double" value="1.5"/>
+	<param name="para_k" type="double" value="0.4"/>
+  </node>
+
+</launch>
