@@ -1,0 +1,12 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <!--
+  <include file="$(find racecar)/launch/teleop.launch">
+  </include>  
+  -->
+  
+  <node name="follow_traj_skcontroller" pkg="follow_traj_skcontrol" type="follow_traj_skcontrol">
+	<param name="para_k" type="double" value="1.68"/>
+  </node>
+
+</launch>
