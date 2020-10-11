@@ -6,7 +6,7 @@
 #include <ackermann_msgs/AckermannDriveStamped.h>
 #include <nav_msgs/Odometry.h>
 
-namespace DecisionPure{
+namespace DecisionSK{
     class SKControl{
         public:
             SKControl(ros::NodeHandle nh, const std::vector<double> &traj_points);
@@ -16,6 +16,7 @@ namespace DecisionPure{
             int point_index = 0;
             double L = 0.256;
             double k = 1.68;
+            double crosstrack_error=0.0;
             double psi = 0.0;
             double current_velocity = 0.0;
             double speed_pub = 0.0;

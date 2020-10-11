@@ -7,7 +7,7 @@
 #include <vector>
 
 const bool DEBUG=true;
-const std::string INPUT_FILE="/home/ad/workspace/racecar-ws/map_trajectory.txt";
+const std::string INPUT_FILE="/home/ad/workspace/racecar-ws/map_trajectory_sk.txt";
 /*
  *The format of the input file is that each line is a command,
  *as an example is :"1 0 0 1".
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
     }
     
     if(DEBUG) ROS_INFO("Trajectory_points_vector_dimension: %ld",trajectory_points.size());	
-    DecisionPure::SKControl skcon(nh, trajectory_points);
+    DecisionSK::SKControl skcon(nh, trajectory_points);
     skcon.ControlSignal();
 
     // auto tr1 = trajectory_points.begin();

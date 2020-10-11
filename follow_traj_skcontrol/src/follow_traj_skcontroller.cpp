@@ -2,14 +2,14 @@
 
 const bool DEBUG=true;
 
-namespace DecisionPure{
+namespace DecisionSK{
     SKControl::SKControl(ros::NodeHandle nh, const std::vector<double> &traj_points)
     {
         trajectory_points = traj_points;
         control_signal_pub  =  nh.advertise<ackermann_msgs::AckermannDriveStamped>("/vesc/high_level/ackermann_cmd_mux/input/nav_0",10);
         current_pose_sub = nh.subscribe("/vesc/odom", 1, &SKControl::CurrentPoseCallback,this);
 	    ros::param::get("~para_k", SKControl::k);
-	    ROS_INFO("Lfc: %.3f, k: %.3f", SKControl::Lfc, SKControl::k);
+	    ROS_INFO("k: %.3f", SKControl::k);
         ros::Duration(1).sleep(); //sleep for 1s to wait the sub and pub init
 
         SKControl::next_pose.x = SKControl::trajectory_points[0];
@@ -46,9 +46,13 @@ namespace DecisionPure{
         Ackermann_msg.drive.steering_angle_velocity = 0;
 
         SKControl::crosstrack_error = (SKControl::next_pose.y-SKControl::current_pose.y)*cos(SKControl::next_pose.theta)-sin(SKControl::next_pose.theta)*(SKControl::next_pose.x-SKControl::current_pose.x);
-        SKControl::psi = SKControl::next_pose.theta - SKControl::current_pose.theta;
-        SKControl::steering_angle_pub = psi + atan2(SKControl::k*SKControl::crosstrack_error/SKControl::current_velocity, 1.0);   
-        SKControl::speed_pub = SKControl::trajectory_points[3*SKControl::point_index+2];
+        SKControl::psi = SKControl::next_pose.theta - SKControl::current_pose.theta;    
+ 	if (SKControl::current_velocity==0)
+ SKControl::steering_angle_pub = 0;
+else
+        SKControl::steering_angle_pub = psi + atan2(SKControl::k*SKControl::crosstrack_error/SKControl::current_velocity, 1.0);  
+ 
+        SKControl::speed_pub = SKControl::trajectory_points[4*SKControl::point_index+3];
         
         if(DEBUG)
         {
