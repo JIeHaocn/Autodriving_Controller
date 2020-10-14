@@ -33,6 +33,7 @@ namespace DecisionSK{
     { 
         bool hasnextpoint;
         hasnextpoint = FindNextTrajectoryPose();
+        // Stanley Kinematic Controller uses front pose, transform from rear to front
         SKControl::next_pose.x = SKControl::next_pose.x + SKControl::L*cos(SKControl::next_pose.theta);
         SKControl::next_pose.y = SKControl::next_pose.y + SKControl::L*sin(SKControl::next_pose.theta);
 
@@ -47,9 +48,9 @@ namespace DecisionSK{
 
         SKControl::crosstrack_error = (SKControl::next_pose.y-SKControl::current_pose.y)*cos(SKControl::next_pose.theta)-sin(SKControl::next_pose.theta)*(SKControl::next_pose.x-SKControl::current_pose.x);
         SKControl::psi = SKControl::next_pose.theta - SKControl::current_pose.theta;    
- 	if (SKControl::current_velocity==0)
- SKControl::steering_angle_pub = 0;
-else
+    	if (SKControl::current_velocity==0)
+            SKControl::steering_angle_pub = 0;
+        else
         SKControl::steering_angle_pub = psi + atan2(SKControl::k*SKControl::crosstrack_error/SKControl::current_velocity, 1.0);  
  
         SKControl::speed_pub = SKControl::trajectory_points[4*SKControl::point_index+3];
@@ -68,16 +69,16 @@ else
         Ackermann_msg.drive.steering_angle = SKControl::steering_angle_pub;
         Ackermann_msg.drive.speed = SKControl::speed_pub;
         
-	if(!hasnextpoint)
-    {
-	    if(pow(SKControl::current_pose.x-SKControl::next_pose.x,2)+pow(SKControl::current_pose.y-SKControl::next_pose.y,2)<pow(0.2,2)){
-            Ackermann_msg.drive.steering_angle = 0;
-            Ackermann_msg.drive.speed = 0;
-            control_signal_pub.publish(Ackermann_msg);
-	        ROS_INFO("Get Final");	
-            return;
-	    }
-    }
+        if(!hasnextpoint)
+        {
+            if(pow(SKControl::current_pose.x-SKControl::next_pose.x,2)+pow(SKControl::current_pose.y-SKControl::next_pose.y,2)<pow(0.2,2)){
+                Ackermann_msg.drive.steering_angle = 0;
+                Ackermann_msg.drive.speed = 0;
+                control_signal_pub.publish(Ackermann_msg);
+                ROS_INFO("Get Final");	
+                return;
+            }
+        }
         control_signal_pub.publish(Ackermann_msg);
         if(DEBUG) ROS_INFO("steering_angle_publisher: %.3f,speed_publisher:%.3f", SKControl::steering_angle_pub,SKControl::speed_pub);	
 
@@ -85,7 +86,7 @@ else
 
     bool SKControl::FindNextTrajectoryPose()
     {
-        if ( SKControl::trajectory_points.size()<=3*(SKControl::point_index+1))
+        if ( SKControl::trajectory_points.size()<=4*(SKControl::point_index+1))
             return false ;
 
 //        double line_angle = 0.0;
@@ -123,7 +124,7 @@ else
         SKControl::next_pose.x = SKControl::trajectory_points[4*SKControl::point_index];
         SKControl::next_pose.y = SKControl::trajectory_points[4*SKControl::point_index+1];
         SKControl::next_pose.theta = SKControl::trajectory_points[4*SKControl::point_index+2];
-        if(DEBUG) ROS_INFO("Points_to_pursuit: %d", SKControl::point_index);	
+        if(DEBUG) ROS_INFO("Points_to_pursuit: %d, x_coordinate: %.3f, y_coordinate: %.3f", SKControl::point_index,SKControl::next_pose.x,SKControl::next_pose.y);
         return true;
 
     } // FindNextTrajectoryPose

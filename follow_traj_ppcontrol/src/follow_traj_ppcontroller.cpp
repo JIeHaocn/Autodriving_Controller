@@ -119,7 +119,7 @@ namespace DecisionPure{
 
         PPControl::next_pose.x = PPControl::trajectory_points[3*PPControl::point_index];
         PPControl::next_pose.y = PPControl::trajectory_points[3*PPControl::point_index+1];
-        if(DEBUG) ROS_INFO("Points_to_pursuit: %d", PPControl::point_index);	
+        if(DEBUG) ROS_INFO("Points_to_pursuit: %d, x_coordinate: %.3f, y_coordinate: %.3f", SKControl::point_index,SKControl::next_pose.x,SKControl::next_pose.y);
         return true;
 
     } // FindNextTrajectoryPose

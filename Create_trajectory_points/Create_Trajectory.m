@@ -129,11 +129,17 @@ classdef Create_Trajectory
             end        
         end
         
-        function print_file(obj)
+        function print_file(obj,num)
 %             traj_theta_deg = obj.traj_theta/pi*180; % unit: degree
-            fid=fopen('route.txt','w');    
-            for i=1:size(obj.traj_x,1)
-                fprintf(fid,'%.6f %.6f %.6f\n',obj.traj_x(i),obj.traj_y(i),obj.traj_speed(i));  
+            fid=fopen('route.txt','w');
+            if num == 3
+                for i=1:size(obj.traj_x,1)
+                    fprintf(fid,'%.6f %.6f %.6f\n',obj.traj_x(i), obj.traj_y(i), obj.traj_speed(i)); 
+                end
+            elseif num == 4
+                for i=1:size(obj.traj_x,1)
+                    fprintf(fid,'%.6f %.6f %.6f %.6f\n',obj.traj_x(i), obj.traj_y(i), obj.traj_theta(i), obj.traj_speed(i));  
+                end
             end
         end
         
