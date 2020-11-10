@@ -63,9 +63,9 @@ classdef Create_Trajectory
         
         function obj = add_line(obj,length)
             if isempty(obj.traj_x) 
-                [traj_x_temp, traj_y_temp, traj_theta_temp] = get_line_points(obj.x0, obj.y0, obj.theta0, length, obj.velocity, obj.sample_time);
+                [traj_x_temp, traj_y_temp, traj_theta_temp] = Create_Trajectory.get_line_points(obj.x0, obj.y0, obj.theta0, length, obj.velocity, obj.sample_time);
             else
-                [traj_x_temp, traj_y_temp, traj_theta_temp] = get_line_points(obj.traj_x(end), obj.traj_y(end), obj.traj_theta(end), length, obj.velocity, obj.sample_time);
+                [traj_x_temp, traj_y_temp, traj_theta_temp] = Create_Trajectory.get_line_points(obj.traj_x(end), obj.traj_y(end), obj.traj_theta(end), length, obj.velocity, obj.sample_time);
             end
             traj_curvature_temp = zeros(size(traj_x_temp,1),1);
             traj_speed_temp =  zeros(size(traj_x_temp,1),1);
@@ -79,9 +79,9 @@ classdef Create_Trajectory
         
         function obj = add_circle(obj,theta_d,radius)
             if isempty(obj.traj_x) 
-                [traj_x_temp, traj_y_temp, traj_theta_temp] = get_circle_points(obj.x0, obj.y0, obj.theta0, theta_d, radius, obj.velocity, obj.sample_time);
+                [traj_x_temp, traj_y_temp, traj_theta_temp] = Create_Trajectory.get_circle_points(obj.x0, obj.y0, obj.theta0, theta_d, radius, obj.velocity, obj.sample_time);
             else
-                [traj_x_temp, traj_y_temp, traj_theta_temp] = get_circle_points(obj.traj_x(end), obj.traj_y(end), obj.traj_theta(end), theta_d, radius, obj.velocity, obj.sample_time);
+                [traj_x_temp, traj_y_temp, traj_theta_temp] = Create_Trajectory.get_circle_points(obj.traj_x(end), obj.traj_y(end), obj.traj_theta(end), theta_d, radius, obj.velocity, obj.sample_time);
             end
             traj_curvature_temp = zeros(size(traj_x_temp,1),1);
             traj_curvature_temp(:) = 1/radius;
@@ -143,6 +143,102 @@ classdef Create_Trajectory
             end
         end
         
+    end
+    
+    methods (Static)
+        function [points_x_return, points_y_return, points_theta_return] = get_circle_points(x0, y0, theta0, theta_d, radius, velocity, sample_time)
+            %   get_line_points  Calculate line segment points
+            %   x0, y0, theta0: initial state of the car
+            %   theta_d: desired central angle of the circle arc
+            %   radius: radius of the circle arc
+            %   velocity: velocity of the car
+            %   sample_time
+            
+            points_x = zeros(5000,1);
+            points_y = zeros(5000,1);
+            points_theta = zeros(5000,1);
+            delta_theta = velocity/radius*sample_time;
+            theta_pass = 0;
+            index = 0;
+            trans_matrix = [cos(theta0) -sin(theta0) x0; sin(theta0) cos(theta0) y0; 0 0 1];
+            
+            if(theta_d > 0)
+                notarrive = theta_pass <= theta_d+1e-10;
+                while(notarrive)
+                    index = index+1;
+                    theta_pass = delta_theta*index;
+                    notarrive = theta_pass <= theta_d+1e-10;
+                    points_x(index) = radius*sin(theta_pass);
+                    points_y(index) = radius*(1-cos(theta_pass));
+                    points_theta(index) = theta0 + theta_pass;
+                    if(~notarrive)
+                        points_x(index) = radius*sin(theta_d);
+                        points_y(index) = radius*(1-cos(theta_d));
+                        points_theta(index) = theta0 + theta_d;
+                    end
+                    temp = trans_matrix*[points_x(index) points_y(index) 1]';
+                    points_x(index) = temp(1);
+                    points_y(index) = temp(2);
+                end
+            else
+                notarrive = theta_pass <= abs(theta_d)+1e-10;
+                while(notarrive)
+                    index = index+1;
+                    theta_pass = delta_theta*index;
+                    notarrive = theta_pass <= abs(theta_d)+1e-10;
+                    points_x(index) = radius*sin(theta_pass);
+                    points_y(index) = -radius*(1-cos(theta_pass));
+                    points_theta(index) = theta0 - theta_pass;
+                    if(~notarrive)
+                        points_x(index) = radius*sin(-theta_d);
+                        points_y(index) = -radius*(1-cos(-theta_d));
+                        points_theta(index) = theta0 + theta_d;
+                    end
+                    temp = trans_matrix*[points_x(index) points_y(index) 1]';
+                    points_x(index) = temp(1);
+                    points_y(index) = temp(2);
+                end
+            end
+            
+            points_x_return = points_x(1:index,1);
+            points_y_return = points_y(1:index,1);
+            points_theta_return = points_theta(1:index,1);
+        end
+        
+        function [points_x_return, points_y_return, points_theta_return] = get_line_points(x0, y0, theta0, length, velocity, sample_time)
+            %   get_line_points  Calculate line segment points
+            %   x0, y0, theta0: initial state of the car
+            %   length: length of the line segment
+            %   velocity: velocity of the car
+            %   sample_time
+            
+            points_x = zeros(5000,1);
+            points_y = zeros(5000,1);
+            points_theta = zeros(5000,1);
+            distance = 0;
+            index = 0;
+            trans_matrix = [cos(theta0) -sin(theta0) x0; sin(theta0) cos(theta0) y0; 0 0 1];
+            notarrive = distance <= length;
+            while(notarrive)
+                index = index+1;
+                distance = velocity*sample_time*index;
+                notarrive = distance <= length;
+                points_x(index) = distance;
+                points_y(index) = 0;
+                points_theta(index) = theta0;
+                if(~notarrive)
+                    points_x(index) = length;
+                    points_y(index) = 0;
+                    points_theta(index) = theta0;
+                end
+                temp = trans_matrix*[points_x(index) points_y(index) 1]';
+                points_x(index) = temp(1);
+                points_y(index) = temp(2);
+            end
+            points_x_return = points_x(1:index,1);
+            points_y_return = points_y(1:index,1);
+            points_theta_return = points_theta(1:index,1);
+        end
     end
 end
 
